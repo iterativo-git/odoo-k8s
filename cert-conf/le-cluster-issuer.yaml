@@ -1,0 +1,32 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  namespace: istio-system
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: technical@gdgsd19.do
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+      - selector:
+          dnsNames:
+            - "*.gdgsd19.do"
+            - "gdgsd19.do"
+        dns01:
+          clouddns:
+            project: zeus-matrix
+            serviceAccountSecretRef:
+              name: cert-manager-credentials
+              key: gcp-dns-admin.json
+
+      - selector: {}
+        http01:
+          ingress:
+            class: istio
+            podTemplate:
+              metadata:
+                labels:
+                  app: "http01"
+                  env: "prod"

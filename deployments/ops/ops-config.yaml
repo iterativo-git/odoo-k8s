@@ -1,0 +1,41 @@
+apiVersion: "v1"
+kind: "ConfigMap"
+metadata:
+  name: "odoo-ops"
+  namespace: "default"
+  labels:
+    app: "odoo"
+data:
+  DATA_DIR: "/var/lib/odoo/data"
+  DB_PORT_5432_TCP_ADDR: "False"
+  DB_MAXCONN: "5"
+  DB_ENV_POSTGRES_PASSWORD: "False"
+  DB_PORT_5432_TCP_PORT: "5432"
+  DB_SSLMODE: disable
+  DB_TEMPLATE: template1
+  DB_ENV_POSTGRES_USER: "False"
+  DBFILTER: ".*"
+  HTTP_INTERFACE: "127.0.0.1"
+  HTTP_PORT: "8069"
+  LIMIT_MEMORY_HARD: "2684354560"
+  LIMIT_MEMORY_SOFT: "2147483648"
+  LIMIT_TIME_CPU: "600"
+  LIMIT_TIME_REAL: "1200"
+  LIMIT_TIME_REAL_CRON: "300"
+  LIST_DB: "True"
+  LOG_DB: "False"
+  LOG_DB_LEVEL: warning
+  LOG_HANDLER: ":WARNING,werkzeug:ERROR,odoo.service.server:INFO"
+  LOG_LEVEL: info
+  MAX_CRON_THREADS: "2"
+  PROXY_MODE: "True"
+  SERVER_WIDE_MODULES: "base,web"
+  SMTP_PASSWORD: "False"
+  SMTP_PORT: "25"
+  SMTP_SERVER: localhost
+  SMTP_SSL: "False"
+  SMTP_USER: "False"
+  TEST_ENABLE: "False"
+  UNACCENT: "True"
+  WITHOUT_DEMO: "True"
+  WORKERS: "4"

@@ -1,0 +1,95 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: odoo-12
+  labels:
+    app: odoo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo
+      branch: "12.0"
+      environment: prod
+  template:
+    metadata:
+      labels:
+        app: odoo
+        tier: frontend
+        branch: "12.0"
+        environment: prod
+        date: "20190921"
+        version: v1
+    spec:
+      initContainers:
+        - name: volume-hack
+          securityContext:
+            runAsUser: 0
+          image: gcr.io/google-containers/busybox:1.27
+          command: ["sh", "-c", "chown 9001:9001 /var/lib/odoo/data;"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: filestore
+              mountPath: /var/lib/odoo/data
+
+      containers:
+        - name: "dockerdoo"
+          image: "gcr.io/zeus-matrix/odoo-repos:12.0"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8069
+            - containerPort: 8072
+          envFrom:
+            - configMapRef:
+                name: odoo-config
+          securityContext:
+            runAsUser: 9001
+            runAsGroup: 9001
+          resources:
+            requests:
+              memory: "6G"
+              cpu: "4000m"
+            limits:
+              memory: "8G"
+              cpu: "6000m"
+          volumeMounts:
+            - name: filestore
+              mountPath: /var/lib/odoo/data
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.15
+          command:
+            [
+              "/cloud_sql_proxy",
+              "-dir=/cloudsql",
+              "-instances=zeus-matrix:us-east1:odoo-psql=unix:/var/run/postgresql",
+              "-credential_file=/secrets/cloudsql/credentials.json",
+            ]
+          securityContext:
+            runAsUser: 2 # non-root user
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "512Mi"
+              cpu: "800m"
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+            - name: cloudsql
+              mountPath: /var/run/postgresql
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+        - name: filestore
+          persistentVolumeClaim:
+            claimName: nfs
+            readOnly: false
+        - name: cloudsql
+          emptyDir:

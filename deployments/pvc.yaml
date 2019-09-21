@@ -1,0 +1,48 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ssd
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nfs
+  labels:
+    app: odoo
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100G
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ssd-claim
+  labels:
+    app: odoo
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ssd
+  resources:
+    requests:
+      storage: 10G
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs
+spec:
+  capacity:
+    storage: 1T
+  accessModes:
+  - ReadWriteMany
+  nfs:
+    server: 10.0.0.1
+    path: /odoo

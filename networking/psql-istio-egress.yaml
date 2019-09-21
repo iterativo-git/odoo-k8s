@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: google-apis
+spec:
+  hosts:
+  - "*.googleapis.com"
+  ports:
+  - name: https
+    number: 443
+    protocol: HTTPS
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cloudsql-instances
+spec:
+  hosts:
+    - metadata.google.internal
+  addresses:
+    - 10.243.80.3
+  ports:
+  - name: tcp 
+    number: 5432
+    protocol: TCP
+  location: MESH_EXTERNAL
